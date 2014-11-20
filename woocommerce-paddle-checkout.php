@@ -3,7 +3,7 @@
  * Plugin Name: Paddle
  * Plugin URI: http://paddle.com
  * Description: Paddle Payment Gateway for WooCommerce
- * Version: 1.0
+ * Version: 1.1
  * Author: Paddle.com
  * Author URI: http://paddle.com
  */
@@ -27,6 +27,7 @@ function init_paddle_gateway_class() {
 		const INTEGRATE_URL = 'vendor/external/integrate';
 		const IMAGE_BOUNCE_PROXY_URL = 'https://checkout.paddle.com/image/';
 		const SIGNUP_LINK = 'https://www.paddle.com/sell?utm_source=WooCommerce&utm_campaign=WooCommerce&utm_medium=WooCommerce&utm_term=sell';
+		const CHECKOUT_SETUP_JS = 'http://paddle.s3.amazonaws.com/checkout/checkout-woocommerce.js';
 
 		protected $supported_currencies;
 		protected $paddle_vendor_id;
@@ -78,7 +79,7 @@ function init_paddle_gateway_class() {
 		 */
 		public function receipt_page($order_id) {
 			// include paddle checkout js, this is used for popup checkout behaviour
-			wp_enqueue_script('my-script', plugins_url('js/checkout.js', __FILE__), array('jquery'));
+			wp_enqueue_script('my-script', self::CHECKOUT_SETUP_JS, array('jquery'));
 
 			echo '<p>' . __('Thank you for your order, please click the button below to pay with Paddle.', 'woocommerce-gateway-paddle-inline-checkout') . '</p>';
 			echo '<button class="paddle_button button alt" href="' . $this->get_pay_url($order_id) . '" target="_blank">Pay Now!</button>&nbsp;';
