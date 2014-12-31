@@ -37,7 +37,7 @@ function init_paddle_gateway_class() {
 			// basic configuration
 			$this->id = 'wcPaddlePaymentGateway';
 			$this->has_fields = false;
-			$this->supported_currencies = array('USD');
+			$this->supported_currencies = array('USD', 'GBP', 'EUR');
 
 			// Checkout name visible in WooCommerce -> Settings -> Checkout
 			$this->method_title = 'Paddle.com Payment Gateway';
@@ -99,7 +99,7 @@ function init_paddle_gateway_class() {
 			$data = array();
 			$data['vendor_id'] = $this->paddle_vendor_id;
 			$data['vendor_auth_code'] = $this->paddle_api_key;
-			$data['price'] = $order->get_total();
+			$data['prices'] = array(get_woocommerce_currency().':'.$order->get_total());
 			$data['return_url'] = $this->get_return_url($order);
 			$data['title'] = $this->product_name;
 			$data['image_url'] = $this->product_icon;
