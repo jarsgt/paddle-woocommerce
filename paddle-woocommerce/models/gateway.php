@@ -12,6 +12,10 @@ class Paddle_WC_Payment_Gateway {
 
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ), 9 );
+		if(!empty($_POST)) {
+			$settings = Paddle_Settings::instance();
+			$settings->save_form();
+		}
 	}
 
 	public function add_admin_menu() {
@@ -22,7 +26,7 @@ class Paddle_WC_Payment_Gateway {
 	public function add_hooks() {
 		add_action('admin_head', ['Paddle_WC_Payment_Gateway', 'inject_admin_javascript']);
 		// Only add checkout hooks if we are integrated, AND currency is supported
-		$settings = new Paddle_Settings();
+		$settings = Paddle_Settings::instance();
 		if(in_array(get_woocommerce_currency(), $this->supported_currencies) && $settings->is_connected ) {
 			Paddle_Checkout::add_hooks();
 		}

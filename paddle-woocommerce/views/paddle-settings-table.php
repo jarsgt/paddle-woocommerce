@@ -1,12 +1,17 @@
 <?php
-$settings = new Paddle_Settings();
+$settings = Paddle_Settings::instance();
 
 ?>
 <form id='mainform' method='POST'>
+	<?php if($settings->settings_saved): ?>
+	<div class='updated'>
+		Settings Saved!
+	</div>
+	<?php endif; ?>
 	<table class="form-table"><tbody>
 		<tr valign="top">
 				<th class="titledesc" scope="row">
-					<label for="woocommerce_wcPaddlePaymentGateway_paddle_showlink">Vendor Account</label>
+					Vendor Account
 				</th>
 				<td class="forminp">
 					<fieldset>
@@ -27,7 +32,7 @@ $settings = new Paddle_Settings();
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span>Paddle Vendor ID</span></legend>
-					<input type="text" placeholder="" value="524" style="" id="woocommerce_wcPaddlePaymentGateway_paddle_vendor_id" name="woocommerce_wcPaddlePaymentGateway_paddle_vendor_id" class="input-text regular-input ">
+					<input type="text" placeholder="" value="<?php echo $settings->get('paddle_vendor_id'); ?>" style="" id="woocommerce_wcPaddlePaymentGateway_paddle_vendor_id" name="woocommerce_wcPaddlePaymentGateway_paddle_vendor_id" class="input-text regular-input ">
 					<p class="description"><a class="open_paddle_popup" href="#">Click here to integrate Paddle account.</a></p>
 				</fieldset>
 			</td>
@@ -38,7 +43,7 @@ $settings = new Paddle_Settings();
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span>Paddle API Key</span></legend>
-					<textarea placeholder="" style="" id="woocommerce_wcPaddlePaymentGateway_paddle_api_key" name="woocommerce_wcPaddlePaymentGateway_paddle_api_key" type="textarea" class="input-text wide-input " cols="20" rows="3">667:c4ca4238a0b923820dcc509a6f75849b421826508fe4fc49c37f453dc09d8793</textarea>
+					<textarea placeholder="" style="" id="woocommerce_wcPaddlePaymentGateway_paddle_api_key" name="woocommerce_wcPaddlePaymentGateway_paddle_api_key" type="textarea" class="input-text wide-input " cols="20" rows="3"><?php echo $settings->get('paddle_api_key'); ?></textarea>
 					<p class="description"><a class="open_paddle_popup" href="#">Click here to integrate Paddle account.</a></p>
 				</fieldset>
 			</td>
@@ -49,11 +54,11 @@ $settings = new Paddle_Settings();
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span>Product Icon</span></legend>
-					<input type="text" placeholder="" value="<?php echo 'todo'; ?>" style="" id="woocommerce_wcPaddlePaymentGateway_product_icon" name="woocommerce_wcPaddlePaymentGateway_product_icon" class="input-text regular-input ">
+					<input type="text" placeholder="" value="<?php echo $settings->get('product_icon'); ?>" style="" id="woocommerce_wcPaddlePaymentGateway_product_icon" name="woocommerce_wcPaddlePaymentGateway_product_icon" class="input-text regular-input ">
 					<p class="description">The url of the icon to show next to the product name during checkout</p>
 				</fieldset>
 			</td>
 		</tr>
 	</tbody></table>
-	<input type='submit' value='Save Settings' />
+	<input type='submit' class='button button-primary' value='Save Settings' />
 </form>
