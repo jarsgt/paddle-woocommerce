@@ -58,6 +58,17 @@ $settings = Paddle_Settings::instance();
 					<p class="description">The url of the icon to show next to the product name during checkout</p>
 				</fieldset>
 			</td>
+		</tr><tr valign="top">
+			<th class="titledesc" scope="row">
+				<label for="woocommerce_wcPaddlePaymentGateway_product_name">Product Name</label>
+			</th>
+			<td class="forminp">
+				<fieldset>
+					<legend class="screen-reader-text"><span>Product Name</span></legend>
+					<input type="text" placeholder="" value="<?php echo $settings->get('product_name'); ?>" style="" id="woocommerce_wcPaddlePaymentGateway_product_name" name="woocommerce_wcPaddlePaymentGateway_product_name" class="input-text regular-input ">
+					<p class="description">The name to be displayed on the checkout</p>
+				</fieldset>
+			</td>
 		</tr>
 	</tbody></table>
 	<input type='submit' class='button button-primary' value='Save Settings' />

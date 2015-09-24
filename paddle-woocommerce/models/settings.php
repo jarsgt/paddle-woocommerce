@@ -8,7 +8,8 @@ class Paddle_Settings
 	private $settings = array(
 		'paddle_vendor_id' => '',
 		'paddle_api_key' => '',
-		'product_icon' => ''
+		'product_icon' => '',
+		'product_name' => ''
 	);
 
 	public $is_connected;
@@ -16,15 +17,16 @@ class Paddle_Settings
 
 	public static function instance()
 	{
-		static $object = null;
-		if($object === null) $object = new static();
-		return $object;
+		if(!isset($GLOBALS['wc_paddle_settings'])) {
+			$GLOBALS['wc_paddle_settings'] = new static();
+		}
+		return $GLOBALS['wc_paddle_settings'];
 	}
 
 	public function __construct()
 	{
 		// Load settings
-		$this->settings = get_option(static::PLUGIN_ID . '_settings', null);
+		$this->settings = array_merge($this->settings, get_option(static::PLUGIN_ID . '_settings', []));
 		$this->is_connected = ($this->settings['paddle_api_key'] && $this->settings['paddle_vendor_id']);
 	}
 
@@ -39,11 +41,17 @@ class Paddle_Settings
 	}
 
 	public function save_form() {
-		$this->settings['paddle_vendor_id'] = $_POST['woocommerce_wcPaddlePaymentGateway_paddle_vendor_id'];
-		$this->settings['paddle_api_key'] = $_POST['woocommerce_wcPaddlePaymentGateway_paddle_api_key'];
-		$this->settings['product_icon'] = $_POST['woocommerce_wcPaddlePaymentGateway_product_icon'];
-		update_option(static::PLUGIN_ID . '_settings', $this->settings);
-		$this->settings_saved = true;
+		$changed = false;
+		foreach($this->settings as $key => $value) {
+			if(isset($_POST['woocommerce_wcPaddlePaymentGateway_'.$key])) {
+				$this->settings[$key] = $_POST['woocommerce_wcPaddlePaymentGateway_'.$key];
+				$changed = true;
+			}
+		}
+		if($changed) {
+			update_option(static::PLUGIN_ID . '_settings', $this->settings);
+			$this->settings_saved = true;
+		}
 	}
 
 	/**
