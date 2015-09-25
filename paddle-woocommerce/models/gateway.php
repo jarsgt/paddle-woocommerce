@@ -4,9 +4,11 @@ class Paddle_WC_Payment_Gateway {
 
 	const AJAX_URL_ORDER = 'paddle/geturl/order';
 	const AJAX_URL_CHECKOUT = 'paddle/geturl/checkout';
-	const CHECKOUT_RETURL_URL = 'paddle/geturl/return';
+	const CHECKOUT_RETURN_URL = 'paddle/geturl/return';
 	const API_GENERATE_PAY_LINK_URL = 'api/2.0/product/generate_pay_link';
+	const API_GET_PUBLIC_KEY_URL = 'api/2.0/user/get_public_key';
 	const PADDLE_ROOT_URL = 'https://staging-vendors.paddle.com/';
+	const PADDLE_CHECKOUT_ROOT_URL = 'https://staging-checkout.paddle.com/';
 	const INTEGRATE_URL = 'vendor/external/integrate';
 	const SIGNUP_LINK = 'https://www.paddle.com/sell?utm_source=WooCommerce&utm_campaign=WooCommerce&utm_medium=WooCommerce&utm_term=sell';
 
@@ -70,7 +72,7 @@ SCRIPT;
 	 * @param string $vendorApiKey
 	 * @return string
 	 */
-	protected function get_vendor_public_key($vendorId, $vendorApiKey) {
+	protected static function get_vendor_public_key($vendorId, $vendorApiKey) {
 		// data to be send to paddle gateway
 		$data = array();
 		$data['vendor_id'] = $vendorId;
@@ -104,7 +106,7 @@ SCRIPT;
 	}
 
 	public static function get_checkout_return_url() {
-		return get_site_url().'/'.Paddle_WC_Payment_Gateway::CHECKOUT_RETURL_URL;
+		return get_site_url().'/'.Paddle_WC_Payment_Gateway::CHECKOUT_RETURN_URL;
 	}
 
 	/**
@@ -116,17 +118,9 @@ SCRIPT;
 	 * @uses get_vendor_public_key to get the vendor key from paddle servers
 	 * @return string vendor key or '' if not set
 	 */
-	public function getPaddleVendorKey() {
-		$vendorId = $this->getPaddleVendorId();
-		$options = get_option($this->plugin_id . $this->id . '_settings');
-		if (isset($options['vendor_public_key']) && $options['vendor_public_key'] && $options['paddle_vendor_id'] == $vendorId) {
-			return $options['vendor_public_key'];
-		}
-		if (isset($_POST[$this->plugin_id . $this->id . '_paddle_api_key'])) {
-			$vendorApiKey = $_POST[$this->plugin_id . $this->id . '_paddle_api_key'];
-			return $this->get_vendor_public_key($vendorId, $vendorApiKey);
-		}
-		return '';
+	public static function getPaddleVendorKey() {
+		$settings = Paddle_Settings::instance();
+		return static::get_vendor_public_key($settings->get('paddle_vendor_id'), $settings->get('paddle_api_key'));
 	}
 
 	/**
@@ -134,9 +128,9 @@ SCRIPT;
 	 * Returns 1 if the signature is correct, 0 if it is incorrect, and -1 on error.
 	 * @return int
 	 */
-	protected function check_webhook_signature() {
+	protected static function check_webhook_signature() {
 		// log error if vendor_public_key is not set
-		$vendor_public_key = $this->getPaddleVendorKey();
+		$vendor_public_key = static::getPaddleVendorKey();
 		if (!$vendor_public_key) {
 			error_log('Paddle error. Unable to verify webhook callback - vendor_public_key is not set.');
 			return -1;
@@ -167,7 +161,7 @@ SCRIPT;
 	 * Returns HTTP 200 if OK, 500 otherwise
 	 */
 	public function gateway_response() {
-		if ($this->check_webhook_signature()) {
+		if (static::check_webhook_signature()) {
 			$order_id = $_GET['order_id'];
 			if (is_numeric($order_id) && (int) $order_id == $order_id) {
 				$order = new WC_Order($order_id);
@@ -190,8 +184,8 @@ SCRIPT;
 	public static function intercept_return_url() {
 		$page_url = $_SERVER['REQUEST_URI'];
 
-		if(strpos($page_url, Paddle_WC_Payment_Gateway::CHECKOUT_RETURL_URL) !== false) {
-			$this->gateway_response();
+		if(strpos($page_url, Paddle_WC_Payment_Gateway::CHECKOUT_RETURN_URL) !== false) {
+			static::gateway_response();
 			exit();
 		}
 	}

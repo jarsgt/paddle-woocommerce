@@ -9,7 +9,7 @@ class Paddle_Checkout {
 
 	public static function inject_checkout_javascript($value) {
 		$order_url = get_site_url().'/'.Paddle_WC_Payment_Gateway::AJAX_URL_ORDER;
-		$checkout_url = get_site_url().'/'.Paddle_WC_Payment_Gateway::AJAX_URL_CHECKOUT;
+		$domain = rtrim(Paddle_WC_Payment_Gateway::PADDLE_CHECKOUT_ROOT_URL, '/');
 		echo <<<SCRIPT
 <!-- Paddle Checkout CSS -->
 <style type='text/css'>
@@ -42,9 +42,6 @@ class Paddle_Checkout {
 #paddle-checkout-popup iframe {
 	width: 100%;
 	height: 100%;
-}
-.btn {
-	color: green;
 }
 </style>
 <!-- Paddle Checkout JS -->
@@ -90,6 +87,18 @@ jQuery(document).ready(function(){
 			}
 		});
 	});
+	window.addEventListener("message", function(event) {
+		if(event.origin.indexOf('$domain') == -1) return;
+		switch(event.data.action) {
+			case 'complete':
+
+				break;
+			case 'close':
+				jQuery('#paddle-checkout-popup-background').hide();
+				jQuery('#paddle-checkout-popup-holder').hide();
+				break;
+		}
+	}, false);
 });
 </script>
 SCRIPT;
@@ -121,14 +130,9 @@ SCRIPT;
 			}
 			exit();
 		}
-		if(strpos($page_url, Paddle_WC_Payment_Gateway::AJAX_URL_CHECKOUT) !== false) {
-			http_response_code(200);
-			echo "todo";
-			exit();
-		}
 	}
 
-	public static function checkout_redirect($order_id, $posted) {
+	public static function checkout_redirect($order_id) {
 		$url = static::get_pay_url($order_id);
 		echo json_encode(array(
 			'result' => 'success',
@@ -138,8 +142,12 @@ SCRIPT;
 		exit();
 	}
 
+	public static function get_webhook_url($order) {
+		return Paddle_WC_Payment_Gateway::get_checkout_return_url().'?order_id='.$order->id;
+	}
+
 	public static function get_return_url($order) {
-		return Paddle_WC_Payment_Gateway::get_checkout_return_url();
+		return 'http://www.example.com';
 	}
 
 	public static function get_pay_url($order_id) {
@@ -155,10 +163,7 @@ SCRIPT;
 		$data['return_url'] = static::get_return_url($order);
 		$data['title'] = $settings->get('product_name');
 		$data['image_url'] = $settings->get('product_icon');
-		$data['webhook_url'] = get_bloginfo('url') . '/?' . build_query(array(
-				'wc-api' => strtolower('Paddle_WC_Payment_Gateway'),
-				'order_id' => $order_id
-		));
+		$data['webhook_url'] = static::get_webhook_url($order);
 		$data['discountable'] = 0;
 		$data['quantity_variable'] = 0;
 		$data['customer_email'] = $order->billing_email;
@@ -166,16 +171,11 @@ SCRIPT;
 		$data['customer_country'] = $woocommerce->customer->country;
 		$data['is_popup'] = 'true';
 		// parent_url is an url to redirect to when close button on checkout popup is clicked
+		// Scheme, hostname, and port must match the page the popup appears on
 		if (version_compare(WOOCOMMERCE_VERSION, '2.1.0', '>=')) {
 			$data['parent_url'] = $order->get_checkout_order_received_url();
 		} else {
 			$data['parent_url'] = $order->get_checkout_payment_url($on_checkout = true);
-		}
-		// paypal_cancel_url is an url to redirect to when 'cancel' link is clicked in paypal
-		if (version_compare(WOOCOMMERCE_VERSION, '2.1', '>=')) {
-			$data['paypal_cancel_url'] = $order->get_checkout_payment_url(true);
-		} else {
-			$data['paypal_cancel_url'] =  add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay'))));
 		}
 		$data['popupCompleted'] = 'default';
 
