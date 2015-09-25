@@ -8,6 +8,46 @@ class Paddle_Checkout {
 	}
 
 	public static function inject_checkout_javascript($value) {
+		if(wp_is_mobile()) {
+			static::output_mobile_js();
+		} else {
+			static::output_popup_js();
+		}
+		return $value;
+	}
+
+	public static function output_mobile_js() {
+		$order_url = get_site_url().'/'.Paddle_WC_Payment_Gateway::AJAX_URL_ORDER;
+		echo <<<SCRIPT
+<!-- Paddle Checkout JS -->
+<script type='text/javascript'>
+jQuery(document).ready(function(){
+	jQuery('#checkout_buttons button[id!=paypal_submit]').click(function(event){
+		event.preventDefault();
+		jQuery.post(
+			'$order_url',
+			jQuery('form.checkout').serializeArray()
+		).done(function(data){
+			data = JSON.parse(data);
+			if(data.result = 'success') {
+				window.location.href = data.checkout_url;
+			} else {
+				var msg = 'Errors: ';
+				for( var i in data.errors ) {
+					var errmsg = data.errors[i];
+					errmsg = errmsg + ',';
+					msg = msg + errmsg;
+				}
+				alert(msg);
+			}
+		});
+	});
+});
+</script>
+SCRIPT;
+	}
+
+	public static function output_popup_js() {
 		$order_url = get_site_url().'/'.Paddle_WC_Payment_Gateway::AJAX_URL_ORDER;
 		$domain = rtrim(Paddle_WC_Payment_Gateway::PADDLE_CHECKOUT_ROOT_URL, '/');
 		echo <<<SCRIPT
@@ -102,7 +142,6 @@ jQuery(document).ready(function(){
 });
 </script>
 SCRIPT;
-		return $value;
 	}
 
 	public static function intercept_url_ajax() {
@@ -173,7 +212,7 @@ SCRIPT;
 		$data['customer_email'] = $order->billing_email;
 		$data['customer_postcode'] = $woocommerce->customer->postcode;
 		$data['customer_country'] = $woocommerce->customer->country;
-		$data['is_popup'] = 'true';
+		$data['is_popup'] = wp_is_mobile() ? 'false' : 'true';
 		// parent_url is an url to redirect to when close button on checkout popup is clicked
 		// Scheme, hostname, and port must match the page the popup appears on
 		if (version_compare(WOOCOMMERCE_VERSION, '2.1.0', '>=')) {
