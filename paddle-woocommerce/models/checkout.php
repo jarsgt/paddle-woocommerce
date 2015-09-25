@@ -177,6 +177,12 @@ SCRIPT;
 		} else {
 			$data['parent_url'] = $order->get_checkout_payment_url($on_checkout = true);
 		}
+		// paypal_cancel_url is an url to redirect to when 'cancel' link is clicked in paypal
+		if (version_compare(WOOCOMMERCE_VERSION, '2.1', '>=')) {
+			$data['paypal_cancel_url'] = $order->get_checkout_payment_url(true);
+		} else {
+			$data['paypal_cancel_url'] =  add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay'))));
+		}
 		$data['popupCompleted'] = 'default';
 
 		// get pay link from paddle api and redirect there
