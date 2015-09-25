@@ -147,7 +147,11 @@ SCRIPT;
 	}
 
 	public static function get_return_url($order) {
-		return 'http://www.example.com';
+		$return_url = $order->get_checkout_order_received_url();
+		if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' ) {
+			$return_url = str_replace( 'http:', 'https:', $return_url );
+		}
+		return apply_filters( 'woocommerce_get_return_url', $return_url );
 	}
 
 	public static function get_pay_url($order_id) {
