@@ -489,7 +489,6 @@ jQuery(document).ready(function(){
 			.append(
 				jQuery('<div>')
 					.prop('id', 'paddle-checkout-popup')
-					.append('<iframe>')
 				)
 		);
 	jQuery('#paddle-checkout-popup-holder').click(function(){
@@ -508,12 +507,17 @@ jQuery(document).ready(function(){
 				jQuery('#paddleLoader').fadeOut(100);
 				jQuery('#paddle-checkout-popup-background').show();
 				jQuery('#paddle-checkout-popup-holder').show();
-				jQuery('#paddle-checkout-popup iframe')
-					.attr('src', data.checkout_url)
-					.attr('frameborder', 0)
-					.attr('allowtransparency', 'true').load(function() {
-						jQuery('#paddleLoader').fadeOut(100);
-					});
+				jQuery('#paddle-checkout-popup').append(
+					jQuery('<iframe>')
+						.attr('src', data.checkout_url)
+						.attr('frameborder', 0)
+						.attr('allowtransparency', 'true')
+						.css({opacity:0})
+						.load(function() {
+							jQuery('#paddleLoader').fadeOut(100);
+							jQuery('#paddle-checkout-popup iframe').animate({opacity:1});
+						})
+				);
 			} else {
 				jQuery('#paddleLoader').hide();
 				var msg = 'Errors: ';
