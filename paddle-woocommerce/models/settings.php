@@ -9,7 +9,9 @@ class Paddle_Settings
 		'paddle_vendor_id' => '',
 		'paddle_api_key' => '',
 		'product_icon' => '',
-		'product_name' => ''
+		'product_name' => '',
+		'checkout_hook' => 'woocommerce_checkout_before_customer_details',
+		'button_css' => '#checkout_buttons button[id!=paypal_submit]'
 	);
 
 	public $is_connected;

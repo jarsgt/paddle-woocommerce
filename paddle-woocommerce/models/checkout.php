@@ -3,7 +3,8 @@
 class Paddle_Checkout {
 
 	public static function add_hooks() {
-		add_filter('woocommerce_checkout_before_customer_details', ['Paddle_Checkout', 'inject_checkout_javascript']);
+		$settings = Paddle_Settings::instance();
+		add_filter($settings->get('checkout_hook'), ['Paddle_Checkout', 'inject_checkout_javascript']);
 		add_action( 'template_redirect', ['Paddle_Checkout', 'intercept_url_ajax']);
 	}
 
@@ -50,6 +51,9 @@ SCRIPT;
 	public static function output_popup_js() {
 		$order_url = get_site_url().'/'.Paddle_WC_Payment_Gateway::AJAX_URL_ORDER;
 		$domain = rtrim(Paddle_WC_Payment_Gateway::PADDLE_CHECKOUT_ROOT_URL, '/');
+		$settings = Paddle_Settings::instance();
+		$css = $settings->get('button_css');
+		$css = json_encode($css); // So that we can safely embed it in javascript
 		echo <<<SCRIPT
 <!-- Paddle Checkout CSS -->
 <style type='text/css'>
@@ -495,7 +499,7 @@ jQuery(document).ready(function(){
 		jQuery('#paddle-checkout-popup-background').hide();
 		jQuery('#paddle-checkout-popup-holder').hide();
 	});
-	jQuery('#checkout_buttons button[id!=paypal_submit]').click(function(event){
+	jQuery($css).click(function(event){
 		event.preventDefault();
 		jQuery('#paddleLoader').fadeIn(150);
 		jQuery.post(
