@@ -7,8 +7,8 @@ class Paddle_WC_Payment_Gateway {
 	const CHECKOUT_RETURN_URL = 'paddle/geturl/return';
 	const API_GENERATE_PAY_LINK_URL = 'api/2.0/product/generate_pay_link';
 	const API_GET_PUBLIC_KEY_URL = 'api/2.0/user/get_public_key';
-	const PADDLE_ROOT_URL = 'https://staging-vendors.paddle.com/';
-	const PADDLE_CHECKOUT_ROOT_URL = 'https://staging-checkout.paddle.com/';
+	const PADDLE_ROOT_URL = 'https://vendors.paddle.com/';
+	const PADDLE_CHECKOUT_ROOT_URL = 'https://checkout.paddle.com/';
 	const INTEGRATE_URL = 'vendor/external/integrate';
 	const SIGNUP_LINK = 'https://www.paddle.com/sell?utm_source=WooCommerce&utm_campaign=WooCommerce&utm_medium=WooCommerce&utm_term=sell';
 
