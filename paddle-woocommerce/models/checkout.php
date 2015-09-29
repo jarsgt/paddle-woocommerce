@@ -514,6 +514,7 @@ jQuery(document).ready(function(){
 				jQuery('#paddleLoader').fadeOut(100);
 				jQuery('#paddle-checkout-popup-background').show();
 				jQuery('#paddle-checkout-popup-holder').show();
+				jQuery('#paddle-checkout-popup iframe').remove();
 				jQuery('#paddle-checkout-popup').append(
 					jQuery('<iframe>')
 						.attr('src', data.checkout_url)
