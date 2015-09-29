@@ -561,6 +561,8 @@ SCRIPT;
 		if(strpos($page_url, Paddle_WC_Payment_Gateway::AJAX_URL_ORDER) !== false) {
 			http_response_code(200);
 			// Intercept before attempting to take payment
+			// Clear the notices, so that we ignore errors that have now been fixed
+			wc_clear_notices();
 			// The action will call exit()
 			add_action('woocommerce_checkout_order_processed', ['Paddle_Checkout', 'checkout_redirect']);
 			// Create the order
