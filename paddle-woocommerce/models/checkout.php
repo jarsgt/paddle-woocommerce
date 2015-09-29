@@ -524,7 +524,8 @@ jQuery(document).ready(function(){
 			jQuery( 'body' ).trigger( 'update_checkout' );
 			data = JSON.parse(data);
 			if(data.result == 'success') {
-				jQuery('#paddleLoader').fadeOut(100);
+				data.checkout_url = data.checkout_url.replace('pay.paddle.com', 'checkout.paddle.com');
+								
 				jQuery('#paddle-checkout-popup-background').show();
 				jQuery('#paddle-checkout-popup-holder').show();
 				jQuery('#paddle-checkout-popup iframe').remove();
@@ -534,11 +535,11 @@ jQuery(document).ready(function(){
 						.attr('frameborder', 0)
 						.attr('allowtransparency', 'true')
 						.css({opacity:0})
-						.load(function() {
-							jQuery('#paddleLoader').fadeOut(100);
-							jQuery('#paddle-checkout-popup iframe').animate({opacity:1});
-						})
 				);
+				jQuery('#paddle-checkout-popup iframe').load(function() {
+					jQuery('#paddleLoader').fadeOut(100);
+					jQuery('#paddle-checkout-popup iframe').animate({opacity:1});
+				});
 			} else {
 				jQuery('#paddleLoader').hide();
 				form.removeClass( 'processing' ).unblock();
