@@ -495,11 +495,14 @@ jQuery(document).ready(function(){
 					.prop('id', 'paddle-checkout-popup')
 				)
 		);
-	jQuery('#paddle-checkout-popup-holder').click(function(){
+	jQuery('#paddle-checkout-popup-holder').click(closePopup);
+	function closePopup(){
 		jQuery('#paddle-checkout-popup-background').hide();
 		jQuery('#paddle-checkout-popup-holder').hide();
-	});
+		jQuery($css).removeProp('disabled');
+	}
 	jQuery($css).click(function(event){
+		jQuery($css).prop('disabled', true);
 		event.preventDefault();
 		jQuery('#paddleLoader').fadeIn(150);
 		jQuery.post(
@@ -531,6 +534,7 @@ jQuery(document).ready(function(){
 					msg = msg + errmsg;
 				}
 				alert(msg);
+				jQuery($css).removeProp('disabled');
 			}
 		});
 	});
@@ -541,8 +545,7 @@ jQuery(document).ready(function(){
 
 				break;
 			case 'close':
-				jQuery('#paddle-checkout-popup-background').hide();
-				jQuery('#paddle-checkout-popup-holder').hide();
+				closePopup();
 				break;
 		}
 	}, false);
