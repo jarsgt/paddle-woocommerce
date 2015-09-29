@@ -569,34 +569,34 @@ SCRIPT;
 			// Intercept before attempting to take payment
 			// Clear the notices, so that we ignore errors that have now been fixed
 			wc_clear_notices();
-			// The action will call exit()
+			// The action will call exit(), unless an error is encountered
 			add_action('woocommerce_checkout_order_processed', ['Paddle_Checkout', 'checkout_redirect']);
 			// Create the order
 			WC()->checkout()->process_checkout();
-			if(wc_notice_count( 'error' ) > 0) {
-				// Errors prevented completion
-				echo json_encode(array(
-					'result' => 'failure',
-					'errors' => WC()->session->get( 'wc_notices', array() )
-				));
-			} else {
-				// Something preevented completion, but, no errors apparently.
-				echo json_encode(array(
+			static::echoResultOrErrors(json_encode(array(
 					'result' => 'failure',
 					'errors' => array('Unknown Error')
-				));
-			}
+				))
+			);
 			exit();
 		}
 	}
 
+	public static function echoResultOrErrors($output) {
+		if(wc_notice_count( 'error' ) > 0) {
+			// Errors prevented completion
+			echo json_encode(array(
+				'result' => 'failure',
+				'errors' => WC()->session->get( 'wc_notices', array() )
+			));
+		} else {
+			echo $output;
+		}
+	}
+
 	public static function checkout_redirect($order_id) {
-		$url = static::get_pay_url($order_id);
-		echo json_encode(array(
-			'result' => 'success',
-			'order_id' => $order_id,
-			'checkout_url' => $url
-		));
+		$output = static::get_pay_url($order_id);
+		static::echoResultOrErrors($output);
 		exit();
 	}
 
@@ -661,27 +661,31 @@ SCRIPT;
 		);
 
 		if (is_wp_error($apiCallResponse)) {
-			echo json_encode(array(
+			wc_add_notice( 'Something went wrong getting checkout url. Unable to get API response.', 'error');
+			error_log('Paddle error. Unable to get API response. Method: ' . __METHOD__ . ' Error message: ' . $apiCallResponse->get_error_message());
+			return json_encode(array(
 				'result' => 'failure',
 				'errors' => array('Something went wrong. Unable to get API response.')
 			));
-			error_log('Paddle error. Unable to get API response. Method: ' . __METHOD__ . ' Error message: ' . $apiCallResponse->get_error_message());
-			exit;
 		} else {
 			$oApiResponse = json_decode($apiCallResponse['body']);
 			if ($oApiResponse && $oApiResponse->success === true) {
-				return $oApiResponse->response->url;
-			} else {
-				echo json_encode(array(
-					'result' => 'failure',
-					'errors' => array('Something went wrong. Check if Paddle account is properly integrated.')
+				return json_encode(array(
+					'result' => 'success',
+					'order_id' => $order_id,
+					'checkout_url' => $oApiResponse->response->url
 				));
+			} else {
+				wc_add_notice( 'Something went wrong getting checkout url. Check if gateway is integrated.', 'error');
 				if (is_object($oApiResponse)) {
 					error_log('Paddle error. Error response from API. Method: ' . __METHOD__ . ' Errors: ' . print_r($oApiResponse->error, true));
 				} else {
 					error_log('Paddle error. Error response from API. Method: ' . __METHOD__ . ' Response: ' . print_r($apiCallResponse, true));
 				}
-				exit;
+				return json_encode(array(
+					'result' => 'failure',
+					'errors' => array('Something went wrong. Check if Paddle account is properly integrated.')
+				));
 			}
 		}
 	}
