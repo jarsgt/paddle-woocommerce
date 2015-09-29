@@ -499,16 +499,29 @@ jQuery(document).ready(function(){
 	function closePopup(){
 		jQuery('#paddle-checkout-popup-background').hide();
 		jQuery('#paddle-checkout-popup-holder').hide();
-		jQuery($css).removeProp('disabled');
+		jQuery($css).closest('form').removeClass( 'processing' ).unblock();
 	}
 	jQuery($css).click(function(event){
-		jQuery($css).prop('disabled', true);
 		event.preventDefault();
+
+		var form = jQuery( event.target ).closest('form');
+
+		if ( form.is( '.processing' ) ) return false;
+
+		form.addClass( 'processing' ).block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+
 		jQuery('#paddleLoader').fadeIn(150);
 		jQuery.post(
 			'$order_url',
 			jQuery('form.checkout').serializeArray()
 		).done(function(data){
+			jQuery( 'body' ).trigger( 'update_checkout' );
 			data = JSON.parse(data);
 			if(data.result == 'success') {
 				jQuery('#paddleLoader').fadeOut(100);
@@ -528,14 +541,7 @@ jQuery(document).ready(function(){
 				);
 			} else {
 				jQuery('#paddleLoader').hide();
-				var msg = 'Errors: ';
-				for( var i in data.errors ) {
-					var errmsg = data.errors[i];
-					errmsg = errmsg + ',';
-					msg = msg + errmsg;
-				}
-				alert(msg);
-				jQuery($css).removeProp('disabled');
+				form.removeClass( 'processing' ).unblock();
 			}
 		});
 	});
