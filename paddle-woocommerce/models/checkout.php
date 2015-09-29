@@ -30,7 +30,7 @@ jQuery(document).ready(function(){
 			jQuery('form.checkout').serializeArray()
 		).done(function(data){
 			data = JSON.parse(data);
-			if(data.result = 'success') {
+			if(data.result == 'success') {
 				window.location.href = data.checkout_url;
 			} else {
 				var msg = 'Errors: ';
@@ -510,7 +510,7 @@ jQuery(document).ready(function(){
 			jQuery('form.checkout').serializeArray()
 		).done(function(data){
 			data = JSON.parse(data);
-			if(data.result = 'success') {
+			if(data.result == 'success') {
 				jQuery('#paddleLoader').fadeOut(100);
 				jQuery('#paddle-checkout-popup-background').show();
 				jQuery('#paddle-checkout-popup-holder').show();
